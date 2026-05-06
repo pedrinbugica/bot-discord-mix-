@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { getSession, setSession } from './mixSession.js';
 import { startVetoOrUpdateMessage } from './mixVeto.js';
+import { addCleanup } from './mixCleanup.js';
 
 export const VOTE_PREFIX = 'mix_vote';
 
@@ -261,10 +262,12 @@ export async function handleCaptainVoteButton(interaction) {
   if (session.captains.A && session.captains.B && session.phase === 'voting') {
     session.phase = 'veto';
     setSession(interaction.guildId, session);
-    await ch.send({
+    const captainsMsg = await ch.send({
       content: `🧢 Capitães definidos!\n🔵 Time A: <@${session.captains.A}>\n🔴 Time B: <@${session.captains.B}>`,
       allowedMentions: { users: [session.captains.A, session.captains.B] },
     });
+    addCleanup(session, ch.id, captainsMsg.id);
+    setSession(interaction.guildId, session);
     await startVetoOrUpdateMessage(ch, interaction.guildId);
   }
 }

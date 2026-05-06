@@ -8,6 +8,8 @@ import {
 import { readMapPool } from './mapPool.js';
 import { getSession, setSession } from './mixSession.js';
 import { formatVoiceMoveSummary, moveTeamsToVoice } from './mixVoiceMove.js';
+import { addCleanup, readCleanupDelayMs, scheduleCleanup } from './mixCleanup.js';
+import { recordPending } from '../history/historyStore.js';
 
 export const VETO_PREFIX = 'mix_veto';
 
@@ -105,12 +107,28 @@ export async function startVetoOrUpdateMessage(channel, guildId) {
   if (!session || session.phase !== 'veto') return null;
   const veto = ensureVeto(session);
   session.vetoDeadlineAt = now() + deadlineMs();
-  setSession(guildId, session);
 
-  return await channel.send({
+  const payload = {
     embeds: [buildEmbed(session)],
-    components: buildButtons(veto.mapsLeft),
-  });
+    components: session.phase !== 'veto' ? [] : buildButtons(veto.mapsLeft),
+  };
+
+  if (session.vetoMessageId) {
+    const existing = await channel.messages
+      .fetch(session.vetoMessageId)
+      .catch(() => null);
+    if (existing) {
+      await existing.edit(payload).catch(() => {});
+      setSession(guildId, session);
+      return existing;
+    }
+  }
+
+  const msg = await channel.send(payload);
+  session.vetoMessageId = msg.id;
+  addCleanup(session, channel.id, msg.id);
+  setSession(guildId, session);
+  return msg;
 }
 
 function applyChoice(session, map) {
@@ -134,7 +152,7 @@ function applyChoice(session, map) {
 
   if (veto.step >= BO3_SEQUENCE.length) {
     veto.decider = veto.mapsLeft[0] ?? undefined;
-    session.phase = 'done';
+    session.phase = 'awaiting_result';
     return { done: true };
   }
   session.vetoDeadlineAt = now() + deadlineMs();
@@ -183,31 +201,77 @@ export async function handleVetoButton(interaction) {
   }
   setSession(interaction.guildId, session);
 
-  await interaction.channel.send({
+  const channel = interaction.channel;
+  const payload = {
     embeds: [buildEmbed(session)],
-    components: session.phase === 'done' ? [] : buildButtons(veto.mapsLeft),
-  });
+    components: session.phase !== 'veto' ? [] : buildButtons(veto.mapsLeft),
+  };
 
-  if (session.phase === 'done') {
+  if (session.vetoMessageId) {
+    const existing = await channel.messages
+      .fetch(session.vetoMessageId)
+      .catch(() => null);
+    if (existing) {
+      await existing.edit(payload).catch(() => {});
+    } else {
+      const sent = await channel.send(payload);
+      session.vetoMessageId = sent.id;
+      addCleanup(session, channel.id, sent.id);
+      setSession(interaction.guildId, session);
+    }
+  } else {
+    const sent = await channel.send(payload);
+    session.vetoMessageId = sent.id;
+    addCleanup(session, channel.id, sent.id);
+    setSession(interaction.guildId, session);
+  }
+
+  if (session.phase === 'awaiting_result') {
     const decider = veto.decider ?? '-';
-    await interaction.channel.send({
+
+    const startedAt = session.startedAt ?? now();
+    const pending = recordPending(interaction.guildId, {
+      startedAt,
+      channelId: channel.id,
+      teamA: session.teamA,
+      teamB: session.teamB,
+      captainA: session.captains.A,
+      captainB: session.captains.B,
+      bans: [...veto.bans],
+      picks: { A: veto.picks.A, B: veto.picks.B },
+      decider: veto.decider,
+    });
+    session.matchId = pending.id;
+    session.startedAt = startedAt;
+
+    const finalMsg = await channel.send({
       content:
         `✅ **Veto BO3 finalizado**\n` +
         `🔵 Pick Time A: **${veto.picks.A ?? '-'}**\n` +
         `🔴 Pick Time B: **${veto.picks.B ?? '-'}**\n` +
-        `🟣 Decider: **${decider}**`,
+        `🟣 Decider: **${decider}**\n\n` +
+        `🏆 Capitães: usem **/win** quando o BO3 acabar (ex.: \`/win time:a(b) 2x0, 2x1 que a partida sera atualizada automaticamente\`).`,
     });
+    addCleanup(session, channel.id, finalMsg.id);
 
     const guild = interaction.guild;
     if (guild) {
       const voiceResult = await moveTeamsToVoice(guild, session.teamA, session.teamB);
       const summary = formatVoiceMoveSummary(voiceResult);
       if (summary) {
-        await interaction.channel.send({
+        const voiceMsg = await channel.send({
           content: summary,
           allowedMentions: { users: [...session.teamA, ...session.teamB] },
         });
+        addCleanup(session, channel.id, voiceMsg.id);
       }
+    }
+
+    setSession(interaction.guildId, session);
+
+    const delayMs = readCleanupDelayMs();
+    if (delayMs > 0) {
+      scheduleCleanup(interaction.client, interaction.guildId, delayMs);
     }
   }
 }

@@ -1,6 +1,8 @@
 /**
  * Sessões em memória (volátil entre restarts).
- * @typedef {'voting' | 'veto' | 'done'} MixPhase
+ * @typedef {'voting' | 'veto' | 'awaiting_result' | 'done'} MixPhase
+ *
+ * @typedef {{ channelId: string; messageId: string }} CleanupRef
  *
  * @typedef {{
  *   phase: MixPhase;
@@ -10,6 +12,7 @@
  *   captains: { A?: string; B?: string };
  *   voteMessageAId?: string;
  *   voteMessageBId?: string;
+ *   vetoMessageId?: string;
  *   veto?: {
  *     step: number; // 0..6
  *     mapsLeft: string[];
@@ -21,6 +24,9 @@
  *   panelChannelId: string;
  *   voteDeadlineAt?: number;
  *   vetoDeadlineAt?: number;
+ *   cleanupMessages: CleanupRef[];
+ *   matchId?: string;
+ *   startedAt?: number;
  * }} MixSession
  */
 

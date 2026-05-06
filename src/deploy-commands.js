@@ -5,12 +5,19 @@ import 'dotenv/config';
 import { REST, Routes } from 'discord.js';
 import { data as mixData } from './commands/mix.js';
 import { data as pingData } from './commands/ping.js';
+import { data as winData } from './commands/win.js';
+import { data as historicoData } from './commands/historico.js';
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
 const guildId = process.env.DISCORD_GUILD_ID;
 
-const commands = [pingData.toJSON(), mixData.toJSON()];
+const commands = [
+  pingData.toJSON(),
+  mixData.toJSON(),
+  winData.toJSON(),
+  historicoData.toJSON(),
+];
 
 if (!token || !clientId) {
   console.error('Defina DISCORD_TOKEN e DISCORD_CLIENT_ID no arquivo .env');

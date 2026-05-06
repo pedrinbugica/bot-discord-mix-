@@ -2,6 +2,14 @@ import 'dotenv/config';
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from 'discord.js';
 import { data as mixData, execute as mixExecute } from './commands/mix.js';
 import { data as pingData, execute as pingExecute } from './commands/ping.js';
+import { data as winData, execute as winExecute } from './commands/win.js';
+import {
+  data as historicoData,
+  execute as historicoExecute,
+  HISTORY_NEXT,
+  HISTORY_PREV,
+  handleHistoryButton,
+} from './commands/historico.js';
 import { handleMixButton } from './mix/mixButtons.js';
 import { MIX_JOIN_ID, MIX_LEAVE_ID } from './mix/mixPanel.js';
 import { VOTE_PREFIX, handleCaptainVoteButton } from './mix/mixCaptainVote.js';
@@ -23,6 +31,11 @@ const client = new Client({
 client.commands = new Collection();
 client.commands.set(pingData.name, { data: pingData, execute: pingExecute });
 client.commands.set(mixData.name, { data: mixData, execute: mixExecute });
+client.commands.set(winData.name, { data: winData, execute: winExecute });
+client.commands.set(historicoData.name, {
+  data: historicoData,
+  execute: historicoExecute,
+});
 
 process.on('unhandledRejection', (reason) => {
   logError('unhandledRejection', reason instanceof Error ? reason : new Error(String(reason)));
@@ -41,19 +54,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    if (
-      interaction.isButton() &&
-      (interaction.customId === MIX_JOIN_ID ||
-        interaction.customId === MIX_LEAVE_ID ||
-        String(interaction.customId).startsWith(`${VOTE_PREFIX}_`) ||
-        String(interaction.customId).startsWith(`${VETO_PREFIX}_`))
-    ) {
-      if (interaction.customId === MIX_JOIN_ID || interaction.customId === MIX_LEAVE_ID) {
+    if (interaction.isButton()) {
+      const cid = String(interaction.customId);
+      if (cid === MIX_JOIN_ID || cid === MIX_LEAVE_ID) {
         await handleMixButton(interaction);
-      } else if (String(interaction.customId).startsWith(`${VOTE_PREFIX}_`)) {
+      } else if (cid.startsWith(`${VOTE_PREFIX}_`)) {
         await handleCaptainVoteButton(interaction);
-      } else if (String(interaction.customId).startsWith(`${VETO_PREFIX}_`)) {
+      } else if (cid.startsWith(`${VETO_PREFIX}_`)) {
         await handleVetoButton(interaction);
+      } else if (
+        cid.startsWith(`${HISTORY_PREV}:`) ||
+        cid.startsWith(`${HISTORY_NEXT}:`)
+      ) {
+        await handleHistoryButton(interaction);
       }
     }
   } catch (err) {

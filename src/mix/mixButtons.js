@@ -11,7 +11,8 @@ import { announceAllowedMentions, buildFullMixMessage } from './mixNotify.js';
 import { splitMixTeams } from './mixTeamSplit.js';
 import { resolveGuild } from './resolveGuild.js';
 import { startCaptainVote } from './mixCaptainVote.js';
-import { clearSession, setSession } from './mixSession.js';
+import { clearSession, getSession, setSession } from './mixSession.js';
+import { addCleanup } from './mixCleanup.js';
 
 /**
  * @param {import('discord.js').ButtonInteraction} interaction
@@ -89,7 +90,7 @@ export async function handleMixButton(interaction) {
       }
 
       const content = buildFullMixMessage(snapshot);
-      await interaction.channel.send({
+      const fullMixMsg = await interaction.channel.send({
         content,
         allowedMentions: announceAllowedMentions(snapshot),
       });
@@ -111,8 +112,10 @@ export async function handleMixButton(interaction) {
         voteDeadlineAt: voteMeta.deadlineAt,
         voteMessageAId: voteMeta.messageAId,
         voteMessageBId: voteMeta.messageBId,
+        cleanupMessages: [],
+        startedAt: Date.now(),
       });
-      await interaction.channel.send({
+      const teamsMsg = await interaction.channel.send({
         content:
           `👥 **Times sorteados**\n` +
           `🔵 **Time A:** ${teamA.map((id) => `<@${id}>`).join(' ')}\n` +
@@ -120,6 +123,15 @@ export async function handleMixButton(interaction) {
           `🧢 Agora abre a **votação de capitão** (uma por time).`,
         allowedMentions: { users: snapshot },
       });
+
+      const session = getSession(guildId);
+      if (session) {
+        addCleanup(session, interaction.channelId, fullMixMsg.id);
+        addCleanup(session, interaction.channelId, voteMeta.messageAId);
+        addCleanup(session, interaction.channelId, voteMeta.messageBId);
+        addCleanup(session, interaction.channelId, teamsMsg.id);
+        setSession(guildId, session);
+      }
 
       clearUsers(guildId);
     }
