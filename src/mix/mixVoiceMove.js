@@ -1,5 +1,6 @@
 import { ChannelType } from 'discord.js';
 import { splitMixTeams } from './mixTeamSplit.js';
+import { resolveVoiceLobbyId, resolveVoiceTeamIds } from '../store/guildConfig.js';
 
 function humanMoveError(err) {
   const code = err && typeof err === 'object' && 'code' in err ? err.code : null;
@@ -27,9 +28,8 @@ function humanMoveError(err) {
  *   failed?: { userId: string; reason: string }[];
  * }>}
  */
-export async function moveMixTeams(guild, userIds) {
-  const idA = process.env.MIX_VOICE_TEAM_A_ID?.trim();
-  const idB = process.env.MIX_VOICE_TEAM_B_ID?.trim();
+export async function moveMixTeams(guild, userIds, guildId = null) {
+  const { teamAId: idA, teamBId: idB } = resolveVoiceTeamIds(guildId ?? guild?.id ?? null);
 
   if (!idA || !idB) {
     return {
@@ -57,7 +57,7 @@ export async function moveMixTeams(guild, userIds) {
     return { ok: false, reason: 'invalid_channels' };
   }
 
-  const lobbyId = process.env.MIX_VOICE_LOBBY_ID?.trim();
+  const lobbyId = resolveVoiceLobbyId(guildId ?? guild?.id ?? null);
 
   /** @type {{ userId: string; team: 'A' | 'B' }[]} */
   const moved = [];
@@ -106,10 +106,10 @@ export async function moveMixTeams(guild, userIds) {
  * @param {import('discord.js').Guild} guild
  * @param {string[]} teamA
  * @param {string[]} teamB
+ * @param {string | null} [guildId]
  */
-export async function moveTeamsToVoice(guild, teamA, teamB) {
-  const idA = process.env.MIX_VOICE_TEAM_A_ID?.trim();
-  const idB = process.env.MIX_VOICE_TEAM_B_ID?.trim();
+export async function moveTeamsToVoice(guild, teamA, teamB, guildId = null) {
+  const { teamAId: idA, teamBId: idB } = resolveVoiceTeamIds(guildId ?? guild?.id ?? null);
 
   if (!idA || !idB) {
     return {
@@ -135,7 +135,7 @@ export async function moveTeamsToVoice(guild, teamA, teamB) {
     return { ok: false, reason: 'invalid_channels' };
   }
 
-  const lobbyId = process.env.MIX_VOICE_LOBBY_ID?.trim();
+  const lobbyId = resolveVoiceLobbyId(guildId ?? guild?.id ?? null);
 
   /** @type {{ userId: string; team: 'A' | 'B' }[]} */
   const moved = [];

@@ -5,6 +5,7 @@ import {
   EmbedBuilder,
 } from 'discord.js';
 import { MIX_QUEUE_MAX } from '../queue/mixQueue.js';
+import { resolveVoiceLobbyId } from '../store/guildConfig.js';
 
 export const MIX_JOIN_ID = 'mix_join';
 export const MIX_LEAVE_ID = 'mix_leave';
@@ -45,8 +46,9 @@ function embedAccentColor() {
 /**
  * @param {import('discord.js').Guild | null} guild — se null, lista só com menções (sem ir buscar nomes).
  * @param {string[]} userIds
+ * @param {string | null} [guildId]
  */
-export async function buildPanelContent(guild, userIds) {
+export async function buildPanelContent(guild, userIds, guildId = null) {
   const slotEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
   const lines = [];
   for (let i = 0; i < userIds.length; i++) {
@@ -62,7 +64,7 @@ export async function buildPanelContent(guild, userIds) {
   }
   const list = lines.length ? lines.join('\n') : '_Ninguém na fila — sê o primeiro._';
 
-  const lobbyId = process.env.MIX_VOICE_LOBBY_ID?.trim();
+  const lobbyId = resolveVoiceLobbyId(guildId ?? guild?.id ?? null);
   const lobbyHint = lobbyId
     ? `\n\n🔊 **Lobby:** <#${lobbyId}> — entra neste canal de voz antes de **Entrar na fila**.`
     : '';

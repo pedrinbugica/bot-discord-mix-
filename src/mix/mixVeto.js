@@ -256,7 +256,7 @@ export async function handleVetoButton(interaction) {
 
     const guild = interaction.guild;
     if (guild) {
-      const voiceResult = await moveTeamsToVoice(guild, session.teamA, session.teamB);
+      const voiceResult = await moveTeamsToVoice(guild, session.teamA, session.teamB, interaction.guildId);
       const summary = formatVoiceMoveSummary(voiceResult);
       if (summary) {
         const voiceMsg = await channel.send({

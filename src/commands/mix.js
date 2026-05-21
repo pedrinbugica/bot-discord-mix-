@@ -53,7 +53,7 @@ export async function execute(interaction) {
   }
 
   const userIds = queue.getUserIds(guildId);
-  const payload = await buildPanelContent(guild, userIds);
+  const payload = await buildPanelContent(guild, userIds, guildId);
   const callback = await interaction.reply({ ...payload, withResponse: true });
   const msg = callback.resource?.message ?? (await interaction.fetchReply());
   queue.setPanel(guildId, interaction.channelId, msg.id);

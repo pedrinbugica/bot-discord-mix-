@@ -7,6 +7,7 @@ import {
   leaveQueue,
 } from '../queue/mixQueue.js';
 import { buildPanelContent, MIX_JOIN_ID, MIX_LEAVE_ID } from './mixPanel.js';
+import { resolveVoiceLobbyId } from '../store/guildConfig.js';
 import { announceAllowedMentions, buildFullMixMessage } from './mixNotify.js';
 import { splitMixTeams } from './mixTeamSplit.js';
 import { resolveGuild } from './resolveGuild.js';
@@ -44,14 +45,14 @@ export async function handleMixButton(interaction) {
   const guild = resolveGuild(interaction.client, guildId, interaction.guild);
 
   if (interaction.customId === MIX_JOIN_ID) {
-    const lobbyId = process.env.MIX_VOICE_LOBBY_ID?.trim();
+    const lobbyId = resolveVoiceLobbyId(guildId);
     const alreadyQueued = getUserIds(guildId).includes(userId);
 
     if (!alreadyQueued && lobbyId && guild) {
       const member = await guild.members.fetch(userId).catch(() => null);
       const voiceId = member?.voice?.channelId ?? null;
       if (voiceId !== lobbyId) {
-        const payload = await buildPanelContent(guild, getUserIds(guildId));
+        const payload = await buildPanelContent(guild, getUserIds(guildId), guildId);
         await editPanelMessage(interaction, payload);
         await interaction.followUp({
           flags: MessageFlags.Ephemeral,
@@ -63,7 +64,7 @@ export async function handleMixButton(interaction) {
 
     const result = joinQueue(guildId, userId);
     if (result.status === 'already' || result.status === 'full') {
-      const payload = await buildPanelContent(guild, getUserIds(guildId));
+      const payload = await buildPanelContent(guild, getUserIds(guildId), guildId);
       await editPanelMessage(interaction, payload);
       const tip =
         result.status === 'already'
@@ -78,7 +79,7 @@ export async function handleMixButton(interaction) {
 
     if (result.full) {
       const snapshot = getUserIds(guildId);
-      const panelFull = await buildPanelContent(guild, snapshot);
+      const panelFull = await buildPanelContent(guild, snapshot, guildId);
       await editPanelMessage(interaction, panelFull);
 
       const delayRaw = process.env.MIX_QUEUE_FULL_DELAY_MS ?? '3000';
@@ -136,14 +137,14 @@ export async function handleMixButton(interaction) {
       clearUsers(guildId);
     }
 
-    const payload = await buildPanelContent(guild, getUserIds(guildId));
+    const payload = await buildPanelContent(guild, getUserIds(guildId), guildId);
     await editPanelMessage(interaction, payload);
     return;
   }
 
   if (interaction.customId === MIX_LEAVE_ID) {
     leaveQueue(guildId, userId);
-    const payload = await buildPanelContent(guild, getUserIds(guildId));
+    const payload = await buildPanelContent(guild, getUserIds(guildId), guildId);
     await editPanelMessage(interaction, payload);
   }
 }

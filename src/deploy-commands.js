@@ -7,6 +7,7 @@ import { data as mixData } from './commands/mix.js';
 import { data as pingData } from './commands/ping.js';
 import { data as winData } from './commands/win.js';
 import { data as historicoData } from './commands/historico.js';
+import { data as configurarData } from './commands/configurar.js';
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
@@ -17,6 +18,7 @@ const commands = [
   mixData.toJSON(),
   winData.toJSON(),
   historicoData.toJSON(),
+  configurarData.toJSON(),
 ];
 
 if (!token || !clientId) {

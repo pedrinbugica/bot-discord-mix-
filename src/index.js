@@ -10,6 +10,7 @@ import {
   HISTORY_PREV,
   handleHistoryButton,
 } from './commands/historico.js';
+import { data as configurarData, execute as configurarExecute } from './commands/configurar.js';
 import { handleMixButton } from './mix/mixButtons.js';
 import { MIX_JOIN_ID, MIX_LEAVE_ID } from './mix/mixPanel.js';
 import { VOTE_PREFIX, handleCaptainVoteButton } from './mix/mixCaptainVote.js';
@@ -36,6 +37,7 @@ client.commands.set(historicoData.name, {
   data: historicoData,
   execute: historicoExecute,
 });
+client.commands.set(configurarData.name, { data: configurarData, execute: configurarExecute });
 
 process.on('unhandledRejection', (reason) => {
   logError('unhandledRejection', reason instanceof Error ? reason : new Error(String(reason)));
