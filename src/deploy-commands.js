@@ -8,6 +8,7 @@ import { data as pingData } from './commands/ping.js';
 import { data as winData } from './commands/win.js';
 import { data as historicoData } from './commands/historico.js';
 import { data as configurarData } from './commands/configurar.js';
+import { data as perguntaData } from './commands/pergunta.js';
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
@@ -19,6 +20,7 @@ const commands = [
   winData.toJSON(),
   historicoData.toJSON(),
   configurarData.toJSON(),
+  perguntaData.toJSON(),
 ];
 
 if (!token || !clientId) {
