@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mix Bot — Guia de Uso</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0f13;
+      --surface:   #16181f;
+      --card:      #1e2029;
+      --border:    #2a2d3a;
+      --accent:    #5865f2;
+      --accent2:   #7289da;
+      --green:     #57f287;
+      --red:       #ed4245;
+      --blue:      #3b82f6;
+      --purple:    #a855f7;
+      --yellow:    #fbbf24;
+      --text:      #e2e4ed;
+      --muted:     #8b8fa8;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0e0f13 0%, #1a1c2e 50%, #0e0f13 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(88,101,242,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(88,101,242,.15);
+      border: 1px solid rgba(88,101,242,.3);
+      color: var(--accent2);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 36px;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .tag {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14,15,19,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    nav a {
+      display: block;
+      padding: 14px 16px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 500;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    nav a:hover { color: var(--text); border-color: var(--accent); }
+
+    /* MAIN */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 56px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    /* SECTION */
+    section { display: flex; flex-direction: column; gap: 20px; }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 4px;
+    }
+    .section-label span { font-size: 1rem; }
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-top: -8px;
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    p { color: var(--muted); }
+
+    /* CARD */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+
+    /* FLOW STEPS */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 44px;
+      bottom: -8px;
+      width: 2px;
+      background: var(--border);
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-body {
+      padding-bottom: 28px;
+      flex: 1;
+    }
+    .step-body h3 { margin-bottom: 4px; }
+    .step-body p { font-size: .92rem; }
+
+    /* COMMANDS */
+    .commands { display: flex; flex-direction: column; gap: 12px; }
+    .cmd-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .cmd-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .cmd-name {
+      font-family: 'Courier New', monospace;
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 4px;
+    }
+    .cmd-desc { font-size: .88rem; color: var(--muted); }
+    .cmd-sub {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sub {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .sub-name {
+      font-family: 'Courier New', monospace;
+      font-size: .82rem;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+    .sub-desc { font-size: .82rem; color: var(--muted); }
+
+    /* SETUP STEPS */
+    .setup-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      counter-reset: setup;
+    }
+    .setup-item {
+      counter-increment: setup;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px 16px 56px;
+      position: relative;
+      font-size: .92rem;
+    }
+    .setup-item::before {
+      content: counter(setup);
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .setup-item strong { color: var(--text); }
+    .setup-item p { margin-top: 4px; font-size: .85rem; }
+
+    /* CODE */
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: .88em;
+      background: rgba(88,101,242,.12);
+      color: var(--accent2);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+    .code-block {
+      background: #0a0b0f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: .88rem;
+      color: #a8b4d8;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+    .code-block .comment { color: #4a5068; }
+    .code-block .key { color: var(--accent2); }
+    .code-block .val { color: var(--green); }
+
+    /* ALERT */
+    .alert {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: .9rem;
+    }
+    .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .alert p { margin: 0; }
+    .alert.info  { background: rgba(59,130,246,.1);  border: 1px solid rgba(59,130,246,.25);  }
+    .alert.warn  { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25);  }
+    .alert.tip   { background: rgba(87,242,135,.08); border: 1px solid rgba(87,242,135,.25);  }
+    .alert.info p  { color: #93c5fd; }
+    .alert.warn p  { color: #fde68a; }
+    .alert.tip  p  { color: #86efac; }
+
+    /* PERMS TABLE */
+    .perms {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .perm-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: .88rem;
+    }
+    .perm-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+    .perm-name { font-weight: 600; color: var(--text); min-width: 180px; }
+    .perm-why  { color: var(--muted); }
+
+    /* TEAMS PREVIEW */
+    .teams-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .team-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      border-top: 3px solid;
+    }
+    .team-box.a { border-color: var(--blue); }
+    .team-box.b { border-color: var(--red); }
+    .team-box h4 { font-size: .9rem; font-weight: 700; margin-bottom: 8px; }
+    .team-box.a h4 { color: var(--blue); }
+    .team-box.b h4 { color: var(--red); }
+    .player { font-size: .82rem; color: var(--muted); padding: 3px 0; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .teams-preview { grid-template-columns: 1fr; }
+      .perm-name { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge"><span>🎮</span> CS2 Mix Bot</div>
+  <h1>Como usar o Mix Bot</h1>
+  <p>Guia completo para configurar e usar o bot de organização de partidas no seu servidor Discord.</p>
+  <div class="hero-tags">
+    <span class="tag">📋 Fila automática</span>
+    <span class="tag">👥 Divisão de times</span>
+    <span class="tag">🗺️ Veto BO3</span>
+    <span class="tag">🏆 Histórico</span>
+    <span class="tag">🔊 Move para voz</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#comandos">Comandos</a>
+    <a href="#configuracao">Configuração</a>
+    <a href="#permissoes">Permissões</a>
+    <a href="#multi-servidor">Multi-servidor</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona">
+    <div class="section-label"><span>🔄</span> Fluxo completo</div>
+    <h2>Como funciona o mix</h2>
+    <p>Do momento em que o painel é criado até o registro do resultado, o bot guia tudo automaticamente.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Criação do painel</h3>
+          <p>Um admin usa <code>/mix panel</code> e o bot publica uma mensagem com os botões <strong>Entrar</strong> e <strong>Sair</strong>. Os jogadores clicam para entrar na fila. O painel mostra em tempo real quantas pessoas já estão na fila.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Fila cheia — times sorteados</h3>
+          <p>Quando 10 jogadores entram, o bot avisa a todos, sorteia os times automaticamente e publica os dois grupos: <strong>🔵 Time A</strong> e <strong>🔴 Time B</strong>.</p>
+          <div class="teams-preview" style="margin-top:14px;">
+            <div class="team-box a">
+              <h4>🔵 Time A</h4>
+              <div class="player">👤 Jogador 1</div>
+              <div class="player">👤 Jogador 2</div>
+              <div class="player">👤 Jogador 3</div>
+              <div class="player">👤 Jogador 4</div>
+              <div class="player">👤 Jogador 5</div>
+            </div>
+            <div class="team-box b">
+              <h4>🔴 Time B</h4>
+              <div class="player">👤 Jogador 6</div>
+              <div class="player">👤 Jogador 7</div>
+              <div class="player">👤 Jogador 8</div>
+              <div class="player">👤 Jogador 9</div>
+              <div class="player">👤 Jogador 10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Votação de capitão</h3>
+          <p>Cada time vota em quem vai ser o capitão clicando nos botões. O mais votado é escolhido. Em caso de empate, o bot decide por sorteio. O capitão representa o time no veto de mapas.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Veto de mapas BO3</h3>
+          <p>Os capitães alternam banindo e escolhendo mapas. A ordem é sempre a mesma:</p>
+          <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--blue); font-weight:700; width:70px;">Time A</span>
+              <span style="background:var(--red); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75rem;">BAN</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--red); font-weight:700; width:70px;">Time B</span>
+              <span style="background:var(--red); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75rem;">BAN</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--blue); font-weight:700; width:70px;">Time A</span>
+              <span style="background:var(--green); color:#000; border-radius:4px; padding:2px 8px; font-size:.75rem;">PICK</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--red); font-weight:700; width:70px;">Time B</span>
+              <span style="background:var(--green); color:#000; border-radius:4px; padding:2px 8px; font-size:.75rem;">PICK</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--blue); font-weight:700; width:70px;">Time A</span>
+              <span style="background:var(--red); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75rem;">BAN</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--red); font-weight:700; width:70px;">Time B</span>
+              <span style="background:var(--red); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75rem;">BAN</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; font-size:.85rem;">
+              <span style="color:var(--purple); font-weight:700; width:70px;">Sobra</span>
+              <span style="background:var(--purple); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75rem;">DECIDER</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Mover para voz (opcional)</h3>
+          <p>Se os canais de voz estiverem configurados, o bot move automaticamente cada time para o canal correto assim que o veto termina.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">6</div>
+        <div class="step-body" style="padding-bottom:0;">
+          <h3>Registro do resultado</h3>
+          <p>Após a partida, um dos capitães usa <code>/win</code> para registrar quem ganhou e o placar. O resultado fica salvo no histórico para consulta futura.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMANDOS -->
+  <section id="comandos">
+    <div class="section-label"><span>💬</span> Referência</div>
+    <h2>Comandos disponíveis</h2>
+    <p>Todos os comandos são do tipo slash — basta digitar <code>/</code> no Discord para vê-los.</p>
+
+    <div class="commands">
+
+      <div class="cmd-card">
+        <div class="cmd-icon">🎮</div>
+        <div>
+          <div class="cmd-name">/mix</div>
+          <div class="cmd-desc">Gerencia o painel da fila. Apenas admins.</div>
+          <div class="cmd-sub">
+            <div class="sub"><span class="sub-name">/mix panel</span><span class="sub-desc">Cria e publica o painel da fila no canal atual.</span></div>
+            <div class="sub"><span class="sub-name">/mix reset</span><span class="sub-desc">Limpa a fila e remove o painel antigo.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd-card">
+        <div class="cmd-icon">🏆</div>
+        <div>
+          <div class="cmd-name">/win</div>
+          <div class="cmd-desc">Registra o resultado da série BO3. Só os capitães da partida atual podem usar.</div>
+          <div class="cmd-sub">
+            <div class="sub"><span class="sub-name">time</span><span class="sub-desc">Time vencedor: A ou B.</span></div>
+            <div class="sub"><span class="sub-name">mapas_a</span><span class="sub-desc">Quantidade de mapas ganhos pelo Time A (0 a 2).</span></div>
+            <div class="sub"><span class="sub-name">mapas_b</span><span class="sub-desc">Quantidade de mapas ganhos pelo Time B (0 a 2).</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd-card">
+        <div class="cmd-icon">📜</div>
+        <div>
+          <div class="cmd-name">/historico</div>
+          <div class="cmd-desc">Mostra as partidas passadas com placar, capitães e mapas. Pode filtrar por jogador.</div>
+          <div class="cmd-sub">
+            <div class="sub"><span class="sub-name">jogador</span><span class="sub-desc">Opcional — filtra as partidas de um jogador específico.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd-card">
+        <div class="cmd-icon">⚙️</div>
+        <div>
+          <div class="cmd-name">/configurar</div>
+          <div class="cmd-desc">Configura os canais de voz do mix neste servidor. Cada servidor tem sua própria configuração.</div>
+          <div class="cmd-sub">
+            <div class="sub"><span class="sub-name">/configurar canais</span><span class="sub-desc">Define lobby, Time A e Time B. Apenas admins.</span></div>
+            <div class="sub"><span class="sub-name">/configurar ver</span><span class="sub-desc">Mostra a configuração atual de canais de voz.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd-card">
+        <div class="cmd-icon">🏓</div>
+        <div>
+          <div class="cmd-name">/ping</div>
+          <div class="cmd-desc">Testa se o bot está online e respondendo.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONFIGURAÇÃO -->
+  <section id="configuracao">
+    <div class="section-label"><span>🚀</span> Primeiro uso</div>
+    <h2>Configurando no seu servidor</h2>
+    <p>Siga os passos abaixo para colocar o bot funcionando do zero num servidor novo.</p>
+
+    <div class="setup-list">
+      <div class="setup-item">
+        <strong>Convide o bot para o servidor</strong>
+        <p>Use o link de convite do bot. O administrador do servidor precisa clicar em <strong>Autorizar</strong> e aceitar as permissões pedidas.</p>
+      </div>
+      <div class="setup-item">
+        <strong>Crie os canais de voz necessários</strong>
+        <p>Você vai precisar de 3 canais de voz: um <strong>Lobby</strong> (onde os jogadores esperam), um <strong>Time A</strong> e um <strong>Time B</strong>. Os nomes podem ser o que quiser.</p>
+      </div>
+      <div class="setup-item">
+        <strong>Configure os canais com <code>/configurar canais</code></strong>
+        <p>Digite o comando e selecione os três canais de voz. Só precisa fazer isso uma vez por servidor.</p>
+      </div>
+      <div class="setup-item">
+        <strong>Crie o painel da fila com <code>/mix panel</code></strong>
+        <p>Use este comando no canal de texto onde quer que a fila fique. O bot publica o painel com os botões de Entrar e Sair.</p>
+      </div>
+      <div class="setup-item">
+        <strong>Pronto! Os jogadores já podem entrar na fila</strong>
+        <p>Quando 10 pessoas clicarem em <strong>Entrar</strong>, o bot inicia o mix automaticamente.</p>
+      </div>
+    </div>
+
+    <div class="alert tip">
+      <div class="alert-icon">💡</div>
+      <p><strong>Dica:</strong> Para testar com menos jogadores, o administrador pode ajustar a variável <code>MIX_QUEUE_MAX</code> nas configurações do bot (ex.: <code>2</code> para testar com apenas 2 pessoas).</p>
+    </div>
+
+    <div>
+      <h3 style="margin-bottom:12px;">Exemplo de uso do <code>/configurar canais</code></h3>
+      <div class="code-block">
+        /configurar canais
+          lobby: <span style="color:var(--accent2)">#lobby-mix</span>
+          time-a: <span style="color:var(--blue)">#time-a-voz</span>
+          time-b: <span style="color:var(--red)">#time-b-voz</span>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="margin-bottom:12px;">Exemplo de uso do <code>/win</code></h3>
+      <div class="code-block">
+        <span class="comment"># Time A ganhou 2x1</span>
+        /win time:A mapas_a:2 mapas_b:1
+
+        <span class="comment"># Time B ganhou 2x0</span>
+        /win time:B mapas_a:0 mapas_b:2
+      </div>
+    </div>
+
+    <div class="alert warn">
+      <div class="alert-icon">⚠️</div>
+      <p><strong>Atenção:</strong> Só os <strong>capitães da partida atual</strong> podem usar o <code>/win</code>. Se nenhum capitão registrar o resultado, o histórico fica marcado como pendente.</p>
+    </div>
+  </section>
+
+  <!-- PERMISSÕES -->
+  <section id="permissoes">
+    <div class="section-label"><span>🔐</span> Bot no servidor</div>
+    <h2>Permissões necessárias</h2>
+    <p>O bot precisa dessas permissões para funcionar corretamente. Sem elas, algumas funções podem falhar.</p>
+
+    <div class="perms">
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Ver canais</div>
+        <div class="perm-why">Para ler mensagens e interagir nos canais de texto.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Enviar mensagens</div>
+        <div class="perm-why">Para publicar o painel, avisos e resultados.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Incorporar links (Embeds)</div>
+        <div class="perm-why">Para exibir o painel da fila com visual formatado.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Gerenciar mensagens</div>
+        <div class="perm-why">Para apagar mensagens temporárias após o veto.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Conectar (voz)</div>
+        <div class="perm-why">Para acessar os canais de voz dos times.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-dot"></div>
+        <div class="perm-name">Mover membros</div>
+        <div class="perm-why">Para mover os jogadores para Time A e Time B após o veto.</div>
+      </div>
+    </div>
+
+    <div class="alert info">
+      <div class="alert-icon">ℹ️</div>
+      <p>Para que o bot possa <strong>mover membros</strong> entre canais de voz, ele precisa ter essa permissão especificamente nos canais de voz do Time A e Time B, não só no servidor como um todo.</p>
+    </div>
+  </section>
+
+  <!-- MULTI-SERVIDOR -->
+  <section id="multi-servidor">
+    <div class="section-label"><span>🌐</span> Vários servidores</div>
+    <h2>Usando em múltiplos servidores</h2>
+    <p>O bot funciona em quantos servidores quiser ao mesmo tempo. Cada servidor tem sua própria fila, histórico e configuração de canais — completamente independentes.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div class="card">
+        <h3 style="margin-bottom:8px; color:var(--green);">✅ Independente por servidor</h3>
+        <p style="font-size:.88rem;">Fila, times, histórico de partidas e canais de voz são separados para cada servidor.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:8px; color:var(--green);">✅ Configuração própria</h3>
+        <p style="font-size:.88rem;">Cada admin configura os canais do seu servidor com <code>/configurar canais</code>.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:8px; color:var(--green);">✅ Uma hospedagem só</h3>
+        <p style="font-size:.88rem;">O bot roda num único lugar e serve todos os servidores simultaneamente.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:8px; color:var(--green);">✅ Nenhuma interferência</h3>
+        <p style="font-size:.88rem;">O mix do servidor A não afeta nem aparece no servidor B.</p>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="margin-bottom:12px;">Como adicionar em um novo servidor</h3>
+      <div class="setup-list">
+        <div class="setup-item">
+          <strong>Compartilhe o link de convite com o admin do novo servidor</strong>
+          <p>O admin clica no link, escolhe o servidor e autoriza. O bot entra automaticamente.</p>
+        </div>
+        <div class="setup-item">
+          <strong>O admin configura os canais de voz</strong>
+          <p>No novo servidor, o admin usa <code>/configurar canais</code> para definir o lobby e os canais dos times.</p>
+        </div>
+        <div class="setup-item">
+          <strong>Cria o painel com <code>/mix panel</code></strong>
+          <p>E pronto — o bot está funcionando de forma independente no novo servidor.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert tip">
+      <div class="alert-icon">💡</div>
+      <p><strong>Os comandos podem levar até 1 hora para aparecer</strong> num servidor novo. Isso é normal — o Discord precisa de tempo para distribuir os comandos globalmente.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Mix Bot — Bot de Discord para organização de partidas de CS2</p>
+</footer>
+
+</body>
+</html>
