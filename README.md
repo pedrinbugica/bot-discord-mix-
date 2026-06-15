@@ -1,48 +1,66 @@
+<div align="center">
+
 # Bot Discord Mix — CS2
 
-Bot de Discord para organizar **mix de CS2** com fila, sorteio de times, votação de capitães, veto de mapas BO3, registro de resultados e **assistente de IA integrado**.
+**Bot de Discord para organizar partidas 5v5 de CS2 com fila inteligente, veto de mapas BO3 e assistente de IA integrado.**
+
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Discord.js](https://img.shields.io/badge/Discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-gpt--4o--mini-412991?style=for-the-badge&logo=openai&logoColor=white)
+
+</div>
+
+---
+
+## Sobre o projeto
+
+Este bot foi criado para comunidades de CS2 que organizam partidas **mix 5v5** — onde jogadores entram numa fila e o bot cuida de tudo: sorteia os times, elege capitães por votação, conduz o veto de mapas em formato BO3 e move os jogadores para os canais de voz certos.
+
+O diferencial é o comando **/pergunta**, que integra a **API da OpenAI (gpt-4o-mini)** diretamente no Discord. Os jogadores podem tirar dúvidas sobre o bot ou sobre o próprio jogo sem sair do chat — o assistente responde em português, com contexto específico de CS2 e dos comandos disponíveis.
+
+<!-- adicionar screenshot -->
 
 ---
 
 ## Funcionalidades
 
-### Mix (5v5)
-- **/mix panel** — publica painel com botões **Entrar / Sair** para a fila
-- Quando a fila enche:
-  - Sorteia **Time A** e **Time B**
-  - Abre **votação de capitão** por time
-  - Inicia **veto de mapas BO3** (ban → pick → ban → ban → decider)
-  - Move jogadores para os canais de voz dos times (se configurado)
-- **/mix reset** — limpa fila e remove painel antigo (staff/admin)
-- Limpeza automática de mensagens temporárias após delay configurável
+| Comando | Descrição |
+|---|---|
+| `/mix panel` | Publica o painel com botões **Entrar / Sair** da fila |
+| `/mix reset` | Limpa a fila e remove o painel antigo (staff/admin) |
+| `/win` | Capitão registra o resultado do BO3 com placar de mapas |
+| `/historico` | Exibe histórico de partidas com paginação, filtrável por jogador |
+| `/pergunta` | Faz uma pergunta à IA especialista em CS2 e nos comandos do bot |
+| `/configurar` | Define os canais de voz dos times por servidor |
 
-### Resultados e Histórico
-- **/win** — capitães registram o resultado do BO3 (placar de mapas)
-- **/historico** — lista partidas anteriores com paginação, filtrável por jogador
+### Fluxo completo de uma partida
 
-### Inteligência Artificial
-- **/pergunta** — assistente de IA especialista em CS2 e no próprio bot
-
-O comando `/pergunta` usa a **API da OpenAI (modelo `gpt-4o-mini`)** para responder dúvidas dos jogadores em tempo real no Discord. O assistente é configurado com um *system prompt* focado em:
-- Dicas de gameplay (mira, economia, granadas, posicionamento)
-- Informações sobre mapas, armas e mecânicas do CS2
-- Como usar os comandos do bot
-
-### Configuração
-- **/configurar** — define os canais de voz dos times por servidor
+1. Staff publica o painel com `/mix panel`
+2. Jogadores clicam em **Entrar** até a fila encher (padrão: 10 jogadores)
+3. O bot sorteia **Time A** e **Time B** automaticamente
+4. Abre **votação de capitão** por time (timeout configurável)
+5. Capitões conduzem o **veto de mapas BO3** (ban → pick → ban → ban → decider)
+6. Jogadores são movidos para os canais de voz dos respectivos times
+7. Ao terminar, um dos capitães registra o resultado com `/win`
 
 ---
 
 ## Tecnologias
 
-- **Node.js 18+** com ES Modules
-- **Discord.js v14** — interação com a API do Discord (slash commands, botões, embeds)
-- **OpenAI API** (`gpt-4o-mini`) — respostas de IA via chat completions
-- **dotenv** — gerenciamento seguro de variáveis de ambiente
+- **[Node.js](https://nodejs.org/) 18+** com ES Modules
+- **[Discord.js v14](https://discord.js.org/)** — slash commands, botões, embeds e interações em tempo real
+- **[OpenAI API](https://platform.openai.com/)** (`gpt-4o-mini`) — respostas de IA via chat completions
+- **[dotenv](https://github.com/motdotla/dotenv)** — gerenciamento seguro de variáveis de ambiente
 
 ---
 
-## Como configurar
+## Como rodar localmente
+
+### Pré-requisitos
+
+- Node.js 18 ou superior
+- Conta no [Discord Developer Portal](https://discord.com/developers/applications) com um bot criado
+- Chave da [OpenAI API](https://platform.openai.com/api-keys)
 
 ### 1. Clone o repositório
 
@@ -59,24 +77,13 @@ npm install
 
 ### 3. Configure as variáveis de ambiente
 
-Copie o arquivo de exemplo e preencha com seus valores:
-
 ```bash
 cp .env.example .env
 ```
 
-Edite o `.env` com:
+Preencha o `.env` com seus valores (veja a seção abaixo).
 
-| Variável | Descrição |
-|---|---|
-| `DISCORD_TOKEN` | Token do bot (Discord Developer Portal → Bot) |
-| `DISCORD_CLIENT_ID` | ID da aplicação (Discord Developer Portal → General) |
-| `DISCORD_GUILD_ID` | ID do servidor para testes (deixe vazio para registro global) |
-| `OPENAI_API_KEY` | Chave da API da OpenAI (platform.openai.com/api-keys) |
-
-> As demais variáveis do `.env.example` são opcionais e controlam comportamentos do mix.
-
-### 4. Registre os slash commands
+### 4. Registre os slash commands no Discord
 
 ```bash
 npm run deploy
@@ -90,8 +97,58 @@ npm start
 
 ---
 
-## Requisitos do bot no Discord
+## Variáveis de ambiente
 
-- Permissões: Enviar mensagens, Ler histórico, Inserir links (embeds), Gerenciar mensagens
-- Para mover jogadores de voz: Ver canais, Conectar, Mover membros (nos canais dos times)
-- Intents necessários: `Guilds`, `GuildVoiceStates`
+Copie o `.env.example` e preencha conforme necessário:
+
+```env
+# OpenAI (obrigatório para o comando /pergunta)
+OPENAI_API_KEY=
+
+# Discord (obrigatório)
+DISCORD_TOKEN=
+DISCORD_CLIENT_ID=
+DISCORD_GUILD_ID=
+
+# Mix: staff — quem pode usar /mix reset sem ser admin (ID do cargo). Opcional.
+MIX_ADMIN_ROLE_ID=
+
+# Visual do painel (opcional)
+MIX_EMBED_COLOR=5865f2
+MIX_EMBED_THUMB_URL=
+
+# Aviso quando a fila enche (opcional)
+MIX_PING_ROLE_ID=
+MIX_PING_HERE=
+
+# Tamanho da fila (padrão 10; use 2 para testes)
+MIX_QUEUE_MAX=10
+
+# Delay antes de mover para voz (ms)
+MIX_QUEUE_FULL_DELAY_MS=3000
+
+# Delay para apagar mensagens temporárias após o veto (ms)
+MIX_CLEANUP_DELAY_MS=30000
+
+# Canais de voz dos times (opcional — necessário para mover jogadores)
+MIX_VOICE_LOBBY_ID=
+MIX_VOICE_TEAM_A_ID=
+MIX_VOICE_TEAM_B_ID=
+MIX_SPLIT_MODE=shuffle
+```
+
+> **Dica:** As únicas variáveis obrigatórias são `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` e `OPENAI_API_KEY`. As demais são opcionais e ativam funcionalidades extras.
+
+---
+
+## Permissões necessárias no Discord
+
+- **Bot:** Enviar mensagens, Ler histórico de mensagens, Inserir links (embeds), Gerenciar mensagens
+- **Para mover de voz:** Ver canais, Conectar, Mover membros (nos canais dos times)
+- **Intents:** `Guilds`, `GuildVoiceStates`
+
+---
+
+<div align="center">
+  <sub>Feito com Node.js, Discord.js e OpenAI API</sub>
+</div>
